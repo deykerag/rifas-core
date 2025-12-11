@@ -6,5 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class PaymentMethod extends Model
 {
-    //
+    protected $fillable = [
+        'name',
+        'description',
+        'status',
+    ];
+
+    public function shoppings()
+    {
+        return $this->hasMany(Shopping::class);
+    }
 }

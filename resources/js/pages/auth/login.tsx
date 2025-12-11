@@ -1,120 +1,120 @@
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import AuthLayout from '@/layouts/auth-layout';
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Lock } from "lucide-react";
+import { Head, useForm, Link } from "@inertiajs/react";
 import { register } from '@/routes';
-import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
 
-interface LoginProps {
-    status?: string;
-    canResetPassword: boolean;
-    canRegister: boolean;
-}
+export default function Login() {
+  const { data, setData, post, processing, errors } = useForm({
+    email: '',
+    password: '',
+    remember: false,
+  });
 
-export default function Login({
-    status,
-    canResetPassword,
-    canRegister,
-}: LoginProps) {
-    return (
-        <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
-        >
-            <Head title="Log in" />
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    post('/login');
+  };
 
-            <Form
-                {...store.form()}
-                resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
-            >
-                {({ processing, errors }) => (
-                    <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    autoFocus
-                                    tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="email@example.com"
-                                />
-                                <InputError message={errors.email} />
-                            </div>
+  return (
+    <>
+      <Head title="Iniciar Sesión" />
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
-                                    {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="ml-auto text-sm"
-                                            tabIndex={5}
-                                        >
-                                            Forgot password?
-                                        </TextLink>
-                                    )}
-                                </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    required
-                                    tabIndex={2}
-                                    autoComplete="current-password"
-                                    placeholder="Password"
-                                />
-                                <InputError message={errors.password} />
-                            </div>
+        <main className="flex-1 flex items-center justify-center py-12 relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
 
-                            <div className="flex items-center space-x-3">
-                                <Checkbox
-                                    id="remember"
-                                    name="remember"
-                                    tabIndex={3}
-                                />
-                                <Label htmlFor="remember">Remember me</Label>
-                            </div>
-
-                            <Button
-                                type="submit"
-                                className="mt-4 w-full"
-                                tabIndex={4}
-                                disabled={processing}
-                                data-test="login-button"
-                            >
-                                {processing && <Spinner />}
-                                Log in
-                            </Button>
-                        </div>
-
-                        {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
-                                    Sign up
-                                </TextLink>
-                            </div>
-                        )}
-                    </>
-                )}
-            </Form>
-
-            {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    {status}
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-md mx-auto">
+              <Card className="p-8 shadow-2xl border-white/20 bg-white/10 backdrop-blur-md">
+                <div className="text-center mb-8">
+                  <div className="bg-gradient-to-br from-primary to-accent p-4 rounded-2xl w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <Lock className="h-10 w-10 text-white" />
+                  </div>
+                  <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                    Bienvenido
+                  </h1>
+                  <p className="text-muted-foreground font-medium">
+                    Ingresa a tu cuenta para continuar
+                  </p>
                 </div>
-            )}
-        </AuthLayout>
-    );
+
+                <form onSubmit={handleLogin} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-foreground/80">Correo Electrónico</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={data.email}
+                      onChange={(e) => setData('email', e.target.value)}
+                      className="bg-background/50 border-input/50 focus:border-primary focus:ring-primary h-11"
+                      placeholder="nombre@ejemplo.com"
+                      required
+                      autoComplete="username"
+                    />
+                    {errors.email && <div className="text-sm text-destructive mt-1 font-medium">{errors.email}</div>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password" className="text-foreground/80">Contraseña</Label>
+                      <Link
+                        href={request()}
+                        className="text-sm text-primary hover:text-accent transition-colors font-medium"
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </Link>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={data.password}
+                      onChange={(e) => setData('password', e.target.value)}
+                      className="bg-background/50 border-input/50 focus:border-primary focus:ring-primary h-11"
+                      placeholder="••••••••"
+                      required
+                      autoComplete="current-password"
+                    />
+                    {errors.password && <div className="text-sm text-destructive mt-1 font-medium">{errors.password}</div>}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    variant="default"
+                    size="lg"
+                    className="w-full font-bold shadow-lg hover:shadow-primary/25 bg-gradient-to-r from-primary to-accent hover:to-primary transition-all duration-300 h-12 text-lg"
+                    disabled={processing}
+                  >
+                    {processing ? 'Iniciando...' : 'Iniciar Sesión'}
+                  </Button>
+                </form>
+
+                <div className="mt-8 pt-6 border-t border-border/50 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    ¿No tienes una cuenta?{" "}
+                    <Link
+                      href={register()}
+                      className="font-bold text-primary hover:text-accent transition-colors hover:underline"
+                    >
+                      Regístrate gratis
+                    </Link>
+                  </p>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    </>
+  );
 }
