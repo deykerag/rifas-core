@@ -22,6 +22,7 @@ class CompanyController extends Controller
      */
     public function create()
     {
+        /*hola*/
         $users = \App\Models\User::all();
         return \Inertia\Inertia::render('Companies/Create', [
             'users' => $users
