@@ -26,6 +26,7 @@ const schema = z.object({
   price_bs: z.coerce.number().min(0, "Precio no negativo"),
   status: z.enum(["draft", "active", "inactive"]),
   company_id: z.string().min(1, "Selecciona una empresa"),
+  draw_date: z.string().optional(),
   image: z.any().optional(),
 })
 
@@ -44,6 +45,7 @@ export default function RaffleEdit({ raffle, companies }: { raffle: Raffle, comp
       price_bs: raffle.price_bs,
       status: raffle.status,
       company_id: String(raffle.company_id),
+      draw_date: raffle.draw_date,
     },
   })
 
@@ -81,7 +83,18 @@ export default function RaffleEdit({ raffle, companies }: { raffle: Raffle, comp
                     <FormField control={form.control} name="tickets_quantity" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Cantidad Tickets</FormLabel>
-                        <FormControl><Input type="number" {...field} /></FormControl>
+                        <Select onValueChange={(val) => field.onChange(Number(val))} defaultValue={String(field.value)}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccione cantidad" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="100">100</SelectItem>
+                            <SelectItem value="1000">1000</SelectItem>
+                            <SelectItem value="10000">10000</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )} />
@@ -144,6 +157,16 @@ export default function RaffleEdit({ raffle, companies }: { raffle: Raffle, comp
                       </FormItem>
                     )} />
 
+                    <FormField control={form.control} name="draw_date" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fecha del Sorteo</FormLabel>
+                        <FormControl><Input type="datetime-local" {...field} value={field.value ?? ''} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="image" render={({ field: { value, onChange, ...fieldProps } }) => (
                       <FormItem>
                         <FormLabel>Imagen Promocional</FormLabel>

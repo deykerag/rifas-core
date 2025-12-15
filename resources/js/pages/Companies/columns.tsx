@@ -73,9 +73,11 @@ export const columns: ColumnDef<Company>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <Link href={`/companies/${company.id}/edit`}>
-              <DropdownMenuItem>Editar</DropdownMenuItem>
-            </Link>
+            <DropdownMenuItem asChild>
+              <Link href={`/companies/${company.id}/edit`}>
+                Editar
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive focus:text-destructive cursor-pointer"
               onClick={() => {

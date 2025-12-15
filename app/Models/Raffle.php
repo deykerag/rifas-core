@@ -14,6 +14,11 @@ class Raffle extends Model
         'image',
         'status',
         'company_id',
+        'draw_date',
+    ];
+
+    protected $casts = [
+        'draw_date' => 'datetime',
     ];
 
     public function company()

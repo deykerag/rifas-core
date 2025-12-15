@@ -41,6 +41,7 @@ class RaffleController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'status' => 'required|in:draft,active,inactive',
             'company_id' => 'required|exists:companies,id',
+            'draw_date' => 'nullable|date',
         ]);
 
         $imagePath = null;
@@ -56,6 +57,7 @@ class RaffleController extends Controller
             'image' => $imagePath,
             'status' => $validated['status'],
             'company_id' => $validated['company_id'],
+            'draw_date' => $validated['draw_date'] ?? null,
         ]);
 
         return redirect()->route('raffles.index')->with('success', 'Rifa creada exitosamente.');
@@ -89,6 +91,7 @@ class RaffleController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'status' => 'required|in:draft,active,inactive',
             'company_id' => 'required|exists:companies,id',
+            'draw_date' => 'nullable|date',
         ]);
 
         $raffle->description = $validated['description'];
@@ -97,6 +100,7 @@ class RaffleController extends Controller
         $raffle->price_bs = $validated['price_bs'];
         $raffle->status = $validated['status'];
         $raffle->company_id = $validated['company_id'];
+        $raffle->draw_date = $validated['draw_date'] ?? null;
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('raffles', 'public');

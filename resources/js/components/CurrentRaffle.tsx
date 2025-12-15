@@ -1,10 +1,58 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Trophy, Users, Tag } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import raffleFlyer from "@/assets/raffle-flyer.jpg";
+import { PurchaseModal } from "@/components/PurchaseModal";
 
-export const CurrentRaffle = () => {
+interface Raffle {
+  id: number;
+  name: string;
+  description: string;
+  tickets_quantity: number;
+  price_usd: number;
+  price_bs: number;
+  image: string;
+  status: string;
+  awards: Array<{
+    id: number;
+    name: string;
+    description: string;
+  }>;
+  created_at: string;
+  draw_date: string | null;
+}
+
+interface CurrentRaffleProps {
+  raffle?: Raffle;
+  paymentMethods?: any[];
+}
+
+export const CurrentRaffle = ({ raffle, paymentMethods = [] }: CurrentRaffleProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Debug: Log what we received
+  console.log('CurrentRaffle received raffle:', raffle);
+  console.log('Raffle is null/undefined?', !raffle);
+
+  if (!raffle) {
+    console.log('No active raffle - showing fallback message');
+    return (
+      <section className="py-24 bg-secondary/10 relative">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold">No hay rifas activas en este momento</h2>
+          <p className="text-muted-foreground mt-4">¡Vuelve pronto para nuevos sorteos!</p>
+        </div>
+      </section>
+    );
+  }
+
+  console.log('Rendering active raffle:', raffle.id, raffle.description);
+
+  // Calculate percentage or placeholder
+  const percentageSold = 65; // Mock for now as we don't have sold count passed yet
+
   return (
     <section className="py-24 bg-secondary/10 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/50 pointer-events-none" />
@@ -18,7 +66,7 @@ export const CurrentRaffle = () => {
             Rifa <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent underline decoration-4 decoration-primary/30 underline-offset-4">Activa</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Descubre todo lo que puedes ganar participando en nuestro sorteo actual. ¡No dejes pasar esta oportunidad!
+            {raffle.description}
           </p>
         </div>
 
@@ -27,7 +75,7 @@ export const CurrentRaffle = () => {
             <div className="relative group overflow-hidden rounded-2xl">
               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
               <img
-                src={raffleFlyer}
+                src={raffle.image ? `/storage/${raffle.image}` : raffleFlyer}
                 alt="Flyer de la Rifa"
                 className="w-full object-cover shadow-inner transition-transform duration-700 group-hover:scale-110"
               />
@@ -36,10 +84,13 @@ export const CurrentRaffle = () => {
               </div>
             </div>
             <div className="p-6">
-              <Button variant="premium" size="xl" className="w-full font-bold text-lg shadow-xl shadow-accent/20" asChild>
-                <Link href="/buy">
-                  ¡Comprar Tickets Ahora!
-                </Link>
+              <Button
+                variant="default"
+                size="lg"
+                className="w-full font-bold text-lg shadow-xl shadow-accent/20 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                onClick={() => setIsModalOpen(true)}
+              >
+                ¡Comprar Tickets Ahora!
               </Button>
             </div>
           </Card>
@@ -53,7 +104,15 @@ export const CurrentRaffle = () => {
                 <div>
                   <h3 className="font-bold text-xl mb-2 text-foreground">Premio Mayor</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Un increíble premio valorado en <span className="font-bold text-foreground">$5,000 USD</span> más premios secundarios garantizados para brindarte más oportunidades de ganar.
+                    {raffle.awards && raffle.awards.length > 0 ? (
+                      <>
+                        <span className="font-bold text-foreground">{raffle.awards[0].name}</span>
+                        <br />
+                        {raffle.awards[0].description}
+                      </>
+                    ) : (
+                      "Premios increíbles te esperan"
+                    )}
                   </p>
                 </div>
               </div>
@@ -67,7 +126,7 @@ export const CurrentRaffle = () => {
                 <div>
                   <h3 className="font-bold text-xl mb-2 text-foreground">Fecha del Sorteo</h3>
                   <p className="text-muted-foreground font-medium text-lg">
-                    15 de Diciembre, 2025 • 8:00 PM
+                    {raffle.draw_date ? new Date(raffle.draw_date).toLocaleDateString() : 'Por definir'}
                   </p>
                   <div className="inline-flex items-center gap-2 mt-3 px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold uppercase tracking-wider">
                     <span className="relative flex h-2 w-2">
@@ -87,9 +146,15 @@ export const CurrentRaffle = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-xl mb-2 text-foreground">Precio del Ticket</h3>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-4xl font-extrabold text-primary">$10.00</p>
-                    <span className="text-sm font-semibold text-muted-foreground">USD</span>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-4xl font-extrabold text-primary">${raffle.price_usd}</p>
+                      <span className="text-sm font-semibold text-muted-foreground">USD</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-2xl font-bold text-foreground">Bs {raffle.price_bs}</p>
+                      <span className="text-xs font-semibold text-muted-foreground">Bolívares</span>
+                    </div>
                   </div>
                   <p className="text-sm text-green-600 font-bold mt-2">
                     🔥 Descuentos por cantidad disponibles
@@ -107,9 +172,9 @@ export const CurrentRaffle = () => {
                   <h3 className="font-bold text-xl mb-2 text-foreground">Participantes</h3>
                   <div className="flex items-center gap-4 mb-2">
                     <div className="flex-1 h-3 bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-primary to-accent animate-pulse" style={{ width: '65%' }}></div>
+                      <div className="h-full bg-gradient-to-r from-primary to-accent animate-pulse" style={{ width: `${percentageSold}%` }}></div>
                     </div>
-                    <span className="font-bold text-foreground">65%</span>
+                    <span className="font-bold text-foreground">{percentageSold}%</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     ¡Apresúrate! Quedan pocos tickets disponibles.
@@ -120,6 +185,19 @@ export const CurrentRaffle = () => {
           </div>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      <PurchaseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        raffle={{
+          id: raffle.id,
+          description: raffle.description,
+          price_usd: raffle.price_usd,
+          price_bs: raffle.price_bs,
+        }}
+        paymentMethods={paymentMethods}
+      />
     </section>
   );
 };

@@ -129,4 +129,31 @@ class ShoppingController extends Controller
 
         return redirect()->route('shoppings.index')->with('success', 'Venta eliminada exitosamente.');
     }
+
+    public function verify(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:dni,email',
+            'value' => 'required|string',
+        ]);
+
+        $query = \App\Models\Shopping::with(['raffle'])
+            ->where('status', 'paid'); // Only paid tickets are valid
+
+        switch ($request->type) {
+            case 'dni':
+                $query->where('dni', $request->value);
+                break;
+            case 'email':
+                $query->where('email', $request->value);
+                break;
+        }
+
+        $tickets = $query->get();
+
+        return response()->json([
+            'valid' => $tickets->isNotEmpty(),
+            'tickets' => $tickets
+        ]);
+    }
 }

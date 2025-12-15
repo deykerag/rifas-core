@@ -20,6 +20,7 @@ export type Raffle = {
   image?: string
   status: 'draft' | 'active' | 'inactive'
   company_id: number
+  draw_date?: string
   company?: {
     name: string
   }

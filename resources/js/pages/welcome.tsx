@@ -5,14 +5,19 @@ import { SocialLinks } from "@/components/SocialLinks";
 import { Footer } from "@/components/Footer";
 import { Head } from "@inertiajs/react";
 
-export default function Welcome() {
+interface Props {
+  canRegister: boolean;
+  activeRaffle?: any;
+  paymentMethods?: any[];
+}
+
+export default function Welcome({ activeRaffle, paymentMethods }: Props) {
   return (
     <>
       <Head title="Inicio" />
       <div className="min-h-screen bg-background font-sans antialiased text-foreground">
         <Header />
-        <Hero />
-        <CurrentRaffle />
+        <CurrentRaffle raffle={activeRaffle} paymentMethods={paymentMethods} />
         <SocialLinks />
         <Footer />
       </div>
