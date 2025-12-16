@@ -23,23 +23,23 @@ const mainNavItems: NavItem[] = [
     href: dashboard(),
     icon: LayoutGrid,
   },
-  {
-    title: 'Usuarios',
-    href: '/users',
-    icon: Users,
-  },
-  {
-    title: 'Empresas',
-    href: '/companies',
-    icon: Building2,
-  },
+  // {
+  //   title: 'Usuarios',
+  //   href: '/users',
+  //   icon: Users,
+  // },
+  // {
+  //   title: 'Empresas',
+  //   href: '/companies',
+  //   icon: Building2,
+  // },
   {
     title: 'Rifas',
     href: '/raffles',
     icon: Ticket,
   },
   {
-    title: 'Ventas',
+    title: 'Compras de tickets',
     href: '/shoppings',
     icon: DollarSign,
   },
@@ -76,11 +76,12 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="hover:bg-accent/10 transition-colors">
               <Link href={dashboard()} prefetch className="flex items-center gap-2">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-sidebar-primary-foreground shadow-lg">
-                  <AppLogoIcon className="size-5 text-white" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-sidebar-primary-foreground shadow-lg font-bold">
+                  {/* <AppLogoIcon className="size-5 text-white" /> */}
+                  R 
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-lg">MegaRifas</span>
+                  <span className="truncate font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-lg">Rifas</span>
                   <span className="truncate text-xs text-muted-foreground">Admin Panel</span>
                 </div>
               </Link>

@@ -27,7 +27,7 @@ export default function Login() {
       <div className="min-h-screen bg-background flex flex-col">
         <Header />
 
-        <main className="flex-1 flex items-center justify-center py-12 relative overflow-hidden">
+        <main className="flex-1 flex items-center justify-center py-12 relative overflow-hidden !mt-[2rem]">
           {/* Background Elements */}
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
           <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
