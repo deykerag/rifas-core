@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,7 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $company = \App\Models\Company::first(['name', 'logo']);
-        view()->share('company_info', $company);
+        if (Schema::hasTable('companies')) {
+            $company = \App\Models\Company::first(['name', 'logo']);
+            view()->share('company_info', $company);
+        }
     }
 }
