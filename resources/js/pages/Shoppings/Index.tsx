@@ -34,6 +34,17 @@ export default function ShoppingsIndex({ shoppings }: ShoppingsIndexProps) {
           columns={columns}
           data={shoppings}
           searchKey="name"
+          filters={[
+            {
+              column: "status",
+              label: "Estado",
+              options: [
+                { label: "Pendiente", value: "pending" },
+                { label: "Pagado", value: "paid" },
+                { label: "Rechazado", value: "rejected" },
+              ],
+            },
+          ]}
         /*createAction={
           <Link href="/shoppings/create">
             <Button>

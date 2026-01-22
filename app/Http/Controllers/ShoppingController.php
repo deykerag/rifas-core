@@ -13,7 +13,7 @@ class ShoppingController extends Controller
      */
     public function index()
     {
-        $shoppings = \App\Models\Shopping::with(['raffle', 'paymentMethod'])->latest()->get();
+        $shoppings = \App\Models\Shopping::with(['raffle', 'paymentMethod.currency'])->latest()->get();
         return \Inertia\Inertia::render('Shoppings/Index', [
             'shoppings' => $shoppings
         ]);

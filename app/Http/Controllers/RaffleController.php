@@ -60,7 +60,7 @@ class RaffleController extends Controller
             'image' => $imagePath,
             'status' => $validated['status'],
             'company_id' => $validated['company_id'],
-            'draw_date' => $validated['draw_date'] ?? null,
+            'draw_date' => $request->filled('draw_date') && $request->draw_date !== 'null' ? $validated['draw_date'] : null,
         ]);
 
         return redirect()->route('raffles.index')->with('success', 'Rifa creada exitosamente.');
@@ -103,7 +103,7 @@ class RaffleController extends Controller
         $raffle->price_bs = $validated['price_bs'];
         $raffle->status = $validated['status'];
         $raffle->company_id = $validated['company_id'];
-        $raffle->draw_date = $validated['draw_date'] ?? null;
+        $raffle->draw_date = $request->filled('draw_date') && $request->draw_date !== 'null' ? $validated['draw_date'] : null;
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('raffles', 'public');
@@ -211,7 +211,7 @@ class RaffleController extends Controller
         }
 
         // Cargamos las relaciones después de encontrar el registro
-        $shopping->load(['raffle', 'paymentMethod']);
+        $shopping->load(['raffle', 'paymentMethod.currency']);
 
         \Log::info('Winner found successfully', [
             'shopping_id' => $shopping->id,

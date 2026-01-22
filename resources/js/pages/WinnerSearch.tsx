@@ -192,7 +192,10 @@ export default function WinnerSearch({ raffles }: WinnerSearchProps) {
                         </div>
                         <div className="pt-2 border-t border-border flex justify-between">
                           <span className="font-bold">Total Abonado:</span>
-                          <span className="font-bold text-primary">{searchResult.amount} BS</span>
+                          <span className="font-bold text-primary">
+                            {searchResult.payment_method?.currency?.symbol || '$'} {searchResult.amount}
+                            {!(searchResult.payment_method?.currency?.symbol === "Bs" || searchResult.payment_method?.currency?.name?.toLowerCase().includes("bolivar")) && " USD"}
+                          </span>
                         </div>
                       </div>
                     </div>

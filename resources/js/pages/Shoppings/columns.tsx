@@ -38,7 +38,11 @@ export type Shopping = {
     description: string
   }
   payment_method?: {
-    name: string
+    name: string;
+    currency?: {
+      symbol: string;
+      name: string;
+    };
   }
 }
 
@@ -198,15 +202,26 @@ export const columns: ColumnDef<Shopping>[] = [
     cell: ({ row }) => <div>{row.getValue("quantity")}</div>,
   },
   {
+    accessorKey: "payment_method.name",
+    header: "Método de Pago",
+    cell: ({ row }) => <div>{row.original.payment_method?.name || '-'}</div>,
+  },
+  {
     accessorKey: "amount",
     header: "Monto",
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"))
+      const currency = row.original.payment_method?.currency
+
+      if (currency?.symbol === "Bs" || currency?.name?.toLowerCase().includes("bolivar")) {
+        return <div className="font-medium">Bs {amount.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</div>
+      }
+
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount)
-      return <div>{formatted}</div>
+      return <div className="font-medium">{formatted}</div>
     },
   },
   {

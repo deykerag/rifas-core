@@ -31,6 +31,11 @@ interface DataTableProps<TData, TValue> {
   createLabel?: string;
   onCreate?: () => void;
   createAction?: React.ReactNode;
+  filters?: {
+    column: string;
+    label: string;
+    options: { label: string; value: string }[];
+  }[];
 }
 
 export function DataTable<TData, TValue>({
@@ -39,7 +44,8 @@ export function DataTable<TData, TValue>({
   searchKey,
   createLabel,
   onCreate,
-  createAction
+  createAction,
+  filters
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -76,6 +82,28 @@ export function DataTable<TData, TValue>({
               className="h-8 w-[150px] lg:w-[250px]"
             />
           )}
+          {filters?.map((filter) => (
+            <div key={filter.column} className="flex items-center space-x-2">
+              <Select
+                value={(table.getColumn(filter.column)?.getFilterValue() as string) ?? "all"}
+                onValueChange={(value) => {
+                  table.getColumn(filter.column)?.setFilterValue(value === "all" ? "" : value);
+                }}
+              >
+                <SelectTrigger className="h-8 w-[150px]">
+                  <SelectValue placeholder={filter.label} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los {filter.label.toLowerCase()}s</SelectItem>
+                  {filter.options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
         </div>
         <div className="flex items-center space-x-2">
           {createAction}

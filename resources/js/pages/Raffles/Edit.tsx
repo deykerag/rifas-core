@@ -26,7 +26,7 @@ const schema = z.object({
   price_bs: z.coerce.number().min(0, "Precio no negativo"),
   status: z.enum(["draft", "active", "inactive"]),
   company_id: z.string().min(1, "Selecciona una empresa"),
-  draw_date: z.string().optional(),
+  draw_date: z.string().nullable().optional(),
   image: z.any().optional(),
 })
 
@@ -52,6 +52,7 @@ export default function RaffleEdit({ raffle, companies }: { raffle: Raffle, comp
   function onSubmit(values: z.infer<typeof schema>) {
     router.post(`/raffles/${raffle.id}`, {
       ...values,
+      draw_date: values.draw_date || null,
       _method: 'put',
     }, {
       forceFormData: true,
@@ -160,37 +161,44 @@ export default function RaffleEdit({ raffle, companies }: { raffle: Raffle, comp
                     <FormField control={form.control} name="draw_date" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Fecha del Sorteo</FormLabel>
-                        <FormControl><Input type="datetime-local" {...field} value={field.value ?? ''} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  </div>
-
-                    <FormField control={form.control} name="image" render={({ field: { value, onChange, ...fieldProps } }) => (
-                      <FormItem>
-                        <FormLabel>Imagen Promocional</FormLabel>
-                        {raffle.image && (
-                          <div className="mb-4 w-full aspect-video rounded-lg overflow-hidden border border-border bg-muted/30 flex items-center justify-center relative group mt-2">
-                            <img 
-                              src={`/storage/${raffle.image}`} 
-                              alt="Current" 
-                              className="h-full w-full object-contain p-2" 
-                            />
-                          </div>
-                        )}
                         <FormControl>
                           <Input
-                            {...fieldProps}
-                            type="file"
-                            accept="image/*"
-                            onChange={(event) => {
-                              onChange(event.target.files && event.target.files[0]);
-                            }}
+                            type="datetime-local"
+                            {...field}
+                            value={field.value ? (field.value.includes('T') ? field.value.substring(0, 16) : field.value.replace(' ', 'T').substring(0, 16)) : ''}
+                            onChange={(e) => field.onChange(e.target.value || null)}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )} />
+                  </div>
+
+                  <FormField control={form.control} name="image" render={({ field: { value, onChange, ...fieldProps } }) => (
+                    <FormItem>
+                      <FormLabel>Imagen Promocional</FormLabel>
+                      {raffle.image && (
+                        <div className="mb-4 w-full aspect-video rounded-lg overflow-hidden border border-border bg-muted/30 flex items-center justify-center relative group mt-2">
+                          <img
+                            src={`/storage/${raffle.image}`}
+                            alt="Current"
+                            className="h-full w-full object-contain p-2"
+                          />
+                        </div>
+                      )}
+                      <FormControl>
+                        <Input
+                          {...fieldProps}
+                          type="file"
+                          accept="image/*"
+                          onChange={(event) => {
+                            onChange(event.target.files && event.target.files[0]);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
 
                   <div className="flex justify-end gap-4">
                     <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancelar</Button>

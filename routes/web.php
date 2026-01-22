@@ -16,7 +16,7 @@ Route::get('/', function () {
         ->latest()
         ->first();
 
-    $paymentMethods = \App\Models\PaymentMethod::where('status', 'active')->get();
+    $paymentMethods = \App\Models\PaymentMethod::with('currency')->where('status', 'active')->get();
 
     $socialNetworks = \App\Models\SocialNetwork::all();
 

@@ -169,7 +169,11 @@ export default function VerifyTicket() {
                                                 type={searchType === "email" ? "email" : "text"}
                                                 value={searchValue}
                                                 onChange={(e) => {
-                                                    setSearchValue(e.target.value);
+                                                    let value = e.target.value;
+                                                    if (searchType === "dni") {
+                                                        value = value.replace(/\D/g, "");
+                                                    }
+                                                    setSearchValue(value);
                                                 }}
                                                 placeholder={getSearchPlaceholder()}
                                                 className="flex-1 w-full"

@@ -12,6 +12,11 @@ interface PaymentMethod {
     name: string;
     description: string;
     status: string;
+    currency?: {
+        id: number;
+        name: string;
+        symbol: string;
+    };
 }
 
 interface PurchaseModalProps {
@@ -91,6 +96,8 @@ export const PurchaseModal = ({ isOpen, onClose, raffle, paymentMethods = [] }: 
                 }
                 if (!formData.phone.trim()) {
                     newErrors.phone = "El teléfono es requerido";
+                } else if (!/^\+\d+/.test(formData.phone)) {
+                    newErrors.phone = "El teléfono debe incluir el código de país (ej. +58)";
                 }
                 if (!formData.email.trim()) {
                     newErrors.email = "El correo electrónico es requerido";
@@ -164,7 +171,11 @@ export const PurchaseModal = ({ isOpen, onClose, raffle, paymentMethods = [] }: 
         submitData.append('phone', formData.phone);
         submitData.append('email', formData.email);
         submitData.append('reference', formData.reference);
-        submitData.append('amount', String(formData.quantity * raffle.price_usd));
+        const selectedMethod = paymentMethods.find(m => m.id === Number(formData.payment_method_id));
+        const isBolivares = selectedMethod?.currency?.symbol === "Bs" || selectedMethod?.currency?.name.toLowerCase().includes("bolivar");
+        const finalAmount = isBolivares ? totalBS : totalUSD;
+
+        submitData.append('amount', String(finalAmount));
         submitData.append('status', 'pending');
 
         if (formData.voucher) {
@@ -396,7 +407,12 @@ export const PurchaseModal = ({ isOpen, onClose, raffle, paymentMethods = [] }: 
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-sm">
                                             <span>Precio por ticket:</span>
-                                            <span className="font-bold">${raffle.price_usd} USD</span>
+                                            <span className="font-bold">
+                                                {paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.symbol === "Bs" || paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.name.toLowerCase().includes("bolivar")
+                                                    ? `Bs ${raffle.price_bs}`
+                                                    : `$${raffle.price_usd} USD`
+                                                }
+                                            </span>
                                         </div>
                                         <div className="flex justify-between text-sm">
                                             <span>Cantidad:</span>
@@ -406,8 +422,15 @@ export const PurchaseModal = ({ isOpen, onClose, raffle, paymentMethods = [] }: 
                                             <div className="flex justify-between">
                                                 <span className="font-bold">Total a Pagar:</span>
                                                 <div className="text-right">
-                                                    <div className="text-primary font-bold text-lg">${totalUSD} USD</div>
-                                                    <div className="text-xs text-muted-foreground">Bs {totalBS}</div>
+                                                    <div className="text-primary font-bold text-lg">
+                                                        {paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.symbol || "$"}
+                                                        {" "}
+                                                        {paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.symbol === "Bs" || paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.name.toLowerCase().includes("bolivar")
+                                                            ? totalBS
+                                                            : totalUSD
+                                                        }
+                                                        {!(paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.symbol === "Bs" || paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.name.toLowerCase().includes("bolivar")) && " USD"}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -427,10 +450,11 @@ export const PurchaseModal = ({ isOpen, onClose, raffle, paymentMethods = [] }: 
                                     id="dni"
                                     value={formData.dni}
                                     onChange={(e) => {
-                                        setFormData({ ...formData, dni: e.target.value });
+                                        const value = e.target.value.replace(/\D/g, '');
+                                        setFormData({ ...formData, dni: value });
                                         if (errors.dni) setErrors({ ...errors, dni: "" });
                                     }}
-                                    placeholder="V-12345678"
+                                    placeholder="12345678"
                                     className={`mt-2 ${errors.dni ? 'border-red-500' : ''}`}
                                     required
                                 />
@@ -467,10 +491,11 @@ export const PurchaseModal = ({ isOpen, onClose, raffle, paymentMethods = [] }: 
                                     id="phone"
                                     value={formData.phone}
                                     onChange={(e) => {
-                                        setFormData({ ...formData, phone: e.target.value });
+                                        const value = e.target.value.replace(/[^\d+ ]/g, '');
+                                        setFormData({ ...formData, phone: value });
                                         if (errors.phone) setErrors({ ...errors, phone: "" });
                                     }}
-                                    placeholder="+58 412-1234567"
+                                    placeholder="+58 4121234567"
                                     className={`mt-2 ${errors.phone ? 'border-red-500' : ''}`}
                                     required
                                 />
@@ -614,8 +639,15 @@ export const PurchaseModal = ({ isOpen, onClose, raffle, paymentMethods = [] }: 
                                 <div className="flex justify-between text-base">
                                     <span className="text-gray-600">Total pagado:</span>
                                     <div className="text-right">
-                                        <div className="font-bold text-green-600">${totalUSD} USD</div>
-                                        <div className="text-sm text-gray-600">Bs {totalBS}</div>
+                                        <div className="font-bold text-green-600">
+                                            {paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.symbol || "$"}
+                                            {" "}
+                                            {paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.symbol === "Bs" || paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.name.toLowerCase().includes("bolivar")
+                                                ? totalBS
+                                                : totalUSD
+                                            }
+                                            {!(paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.symbol === "Bs" || paymentMethods.find(m => m.id === Number(formData.payment_method_id))?.currency?.name.toLowerCase().includes("bolivar")) && " USD"}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-base">

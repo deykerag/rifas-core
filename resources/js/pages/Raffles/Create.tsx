@@ -26,7 +26,7 @@ const schema = z.object({
   price_bs: z.coerce.number().min(0, "Precio no negativo"),
   status: z.enum(["draft", "active", "inactive"]),
   company_id: z.string().min(1, "Selecciona una empresa"),
-  draw_date: z.string().optional(),
+  draw_date: z.string().nullable().optional(),
   image: z.any().optional(),
 })
 
@@ -50,7 +50,10 @@ export default function RaffleCreate({ companies }: { companies: Company[] }) {
   })
 
   function onSubmit(values: z.infer<typeof schema>) {
-    router.post('/raffles', values, {
+    router.post('/raffles', {
+      ...values,
+      draw_date: values.draw_date || null,
+    }, {
       forceFormData: true,
     })
   }
@@ -157,42 +160,48 @@ export default function RaffleCreate({ companies }: { companies: Company[] }) {
                     <FormField control={form.control} name="draw_date" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Fecha del Sorteo</FormLabel>
-                        <FormControl><Input type="datetime-local" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  </div>
-
-                    <FormField control={form.control} name="image" render={({ field: { value, onChange, ...fieldProps } }) => (
-                      <FormItem>
-                        <FormLabel>Imagen Promocional</FormLabel>
-                        {previewUrl && (
-                          <div className="mb-4 w-full aspect-video rounded-lg overflow-hidden border border-border bg-muted/30 flex items-center justify-center relative group mt-2">
-                            <img 
-                              src={previewUrl} 
-                              alt="Preview" 
-                              className="h-full w-full object-contain p-2" 
-                            />
-                          </div>
-                        )}
                         <FormControl>
                           <Input
-                            {...fieldProps}
-                            type="file"
-                            accept="image/*"
-                            onChange={(event) => {
-                              const file = event.target.files && event.target.files[0];
-                              if (file) {
-                                  const url = URL.createObjectURL(file);
-                                  setPreviewUrl(url);
-                                  onChange(file);
-                              }
-                            }}
+                            type="datetime-local"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value || null)}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )} />
+                  </div>
+
+                  <FormField control={form.control} name="image" render={({ field: { value, onChange, ...fieldProps } }) => (
+                    <FormItem>
+                      <FormLabel>Imagen Promocional</FormLabel>
+                      {previewUrl && (
+                        <div className="mb-4 w-full aspect-video rounded-lg overflow-hidden border border-border bg-muted/30 flex items-center justify-center relative group mt-2">
+                          <img
+                            src={previewUrl}
+                            alt="Preview"
+                            className="h-full w-full object-contain p-2"
+                          />
+                        </div>
+                      )}
+                      <FormControl>
+                        <Input
+                          {...fieldProps}
+                          type="file"
+                          accept="image/*"
+                          onChange={(event) => {
+                            const file = event.target.files && event.target.files[0];
+                            if (file) {
+                              const url = URL.createObjectURL(file);
+                              setPreviewUrl(url);
+                              onChange(file);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
 
                   <div className="flex justify-end gap-4">
                     <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancelar</Button>
