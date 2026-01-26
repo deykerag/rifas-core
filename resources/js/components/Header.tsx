@@ -48,12 +48,12 @@ export const Header = () => {
                     </nav>
 
                     <div className="flex items-center gap-3">
-                        <Button variant="ghost" size="sm" asChild className="hidden md:flex">
+                        {/* <Button variant="ghost" size="sm" asChild className="hidden md:flex">
                             <Link href="/login">
                                 <LogIn className="mr-2 h-4 w-4" />
                                 Admin
                             </Link>
-                        </Button>
+                        </Button> */}
 
                         <button
                             className="md:hidden p-2 text-foreground hover:bg-muted rounded-md transition-colors"
@@ -74,9 +74,9 @@ export const Header = () => {
                         <Link href="/" className="text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
                         <Link href="/verify" className="text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>Verificar Ticket</Link>
                         {/*<Link href="/history" className="text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>Rifas Anteriores</Link>*/}
-                        <Link href="/login" className="flex items-center text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>
+                        {/* <Link href="/login" className="flex items-center text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>
                             <LogIn className="mr-2 h-5 w-5" /> Admin
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
             )}

@@ -56,7 +56,7 @@ class ShoppingController extends Controller
             $voucherPath = $request->file('voucher')->store('vouchers', 'public');
         }
 
-        \App\Models\Shopping::create([
+        $shopping = \App\Models\Shopping::create([
             'raffle_id' => $validated['raffle_id'],
             'payment_method_id' => $validated['payment_method_id'],
             'name' => $validated['name'],
@@ -69,6 +69,14 @@ class ShoppingController extends Controller
             'voucher' => $voucherPath,
             'status' => $validated['status'],
         ]);
+
+        if ($shopping->status !== 'rejected') {
+            $this->assignNumbers($shopping);
+        }
+
+        if ($shopping->status === 'paid') {
+            Mail::to($shopping->email)->send(new OrderApprovedMail($shopping));
+        }
 
         return redirect()->route('shoppings.index')->with('success', 'Venta registrada exitosamente.');
     }
@@ -126,8 +134,13 @@ class ShoppingController extends Controller
         $oldStatus = $shopping->status;
         $shopping->update($data);
 
+        // Assign numbers if moving to paid (or if pending and doesn't have them)
+        if ($shopping->status !== 'rejected' && empty($shopping->assigned_numbers)) {
+            $this->assignNumbers($shopping);
+        }
+
         if ($oldStatus !== 'paid' && $shopping->status === 'paid') {
-            Mail::to($shopping->email)->send(new OrderApprovedMail($shopping));
+            Mail::to($shopping->email)->send(new OrderApprovedMail($shopping->fresh(['raffle', 'paymentMethod.currency'])));
         }
 
         return redirect()->route('shoppings.index')->with('success', 'Venta actualizada exitosamente.');
@@ -151,7 +164,7 @@ class ShoppingController extends Controller
             'value' => 'required|string',
         ]);
 
-        $query = \App\Models\Shopping::with(['raffle']);
+        $query = \App\Models\Shopping::with(['raffle', 'paymentMethod.currency']);
 
         switch ($request->type) {
             case 'dni':
@@ -185,55 +198,6 @@ class ShoppingController extends Controller
             'voucher' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
         ]);
 
-        // Get Raffle configuration
-        $raffle = \App\Models\Raffle::findOrFail($validated['raffle_id']);
-        $maxTickets = $raffle->tickets_quantity;
-        
-        // Determine padding based on maxTickets (e.g. 100 -> 2 digits, 1000 -> 3 digits)
-        $digits = strlen((string)($maxTickets - 1));
-
-        // Get already assigned numbers for this raffle
-        $usedNumbers = \App\Models\Shopping::where('raffle_id', $raffle->id)
-            ->whereIn('status', ['pending', 'paid']) // Consider pending as reserved
-            ->pluck('assigned_numbers')
-            ->flatten()
-            ->toArray();
-
-        // Check availability
-        $availableCount = $maxTickets - count($usedNumbers);
-        if ($validated['quantity'] > $availableCount) {
-             return response()->json([
-                'message' => 'No hay suficientes tickets disponibles. Quedan ' . $availableCount
-             ], 422);
-        }
-
-        // Generate unique random numbers
-        $assignedNumbers = [];
-        $needed = $validated['quantity'];
-        
-        // Strategy: if needed is small relative to max, random guessing is efficient.
-        // If needed is large, shuffling an array of available is better? 
-        // For now, random guess loop with safety is standard for typical raffle sizes.
-        
-        // Optimizing for larger datasets:
-        // Create a pool of available numbers if usage is high could be memory intensive.
-        // Let's rely on a generation loop for now, assuming sufficient sparsity.
-        // If raffle is almost full, this might be slow, but it's a start.
-        
-        while (count($assignedNumbers) < $needed) {
-            $num = mt_rand(0, $maxTickets - 1);
-            $formattedNum = str_pad((string)$num, $digits, '0', STR_PAD_LEFT);
-            
-            if (!in_array($formattedNum, $usedNumbers) && !in_array($formattedNum, $assignedNumbers)) {
-                $assignedNumbers[] = $formattedNum;
-            }
-            
-            // Safety break just in case (though validation above should prevent infinite loop)
-            if (count($usedNumbers) + count($assignedNumbers) >= $maxTickets) {
-                break;
-            }
-        }
-
         $voucherPath = $request->file('voucher')->store('vouchers', 'public');
 
         $shopping = \App\Models\Shopping::create([
@@ -248,13 +212,49 @@ class ShoppingController extends Controller
             'reference' => $validated['reference'],
             'voucher' => $voucherPath,
             'status' => 'pending',
-            'assigned_numbers' => $assignedNumbers,
         ]);
+
+        $this->assignNumbers($shopping);
 
         return response()->json([
             'message' => 'Compra registrada exitosamente',
             'shopping' => $shopping,
-            'tickets' => $assignedNumbers
+            'tickets' => $shopping->assigned_numbers
         ]);
+    }
+
+    private function assignNumbers(\App\Models\Shopping $shopping)
+    {
+        $raffle = $shopping->raffle;
+        $maxTickets = $raffle->tickets_quantity;
+        $digits = strlen((string)($maxTickets - 1));
+
+        $usedNumbers = \App\Models\Shopping::where('raffle_id', $raffle->id)
+            ->whereIn('status', ['pending', 'paid'])
+            ->where('id', '!=', $shopping->id)
+            ->pluck('assigned_numbers')
+            ->flatten()
+            ->filter()
+            ->toArray();
+
+        $assignedNumbers = is_array($shopping->assigned_numbers) ? $shopping->assigned_numbers : [];
+        $needed = $shopping->quantity - count($assignedNumbers);
+
+        if ($needed <= 0) return;
+
+        while (count($assignedNumbers) < $shopping->quantity) {
+            $num = mt_rand(0, $maxTickets - 1);
+            $formattedNum = str_pad((string)$num, $digits, '0', STR_PAD_LEFT);
+            
+            if (!in_array($formattedNum, $usedNumbers) && !in_array($formattedNum, $assignedNumbers)) {
+                $assignedNumbers[] = $formattedNum;
+            }
+
+            if (count($usedNumbers) + count($assignedNumbers) >= $maxTickets) {
+                break;
+            }
+        }
+
+        $shopping->update(['assigned_numbers' => $assignedNumbers]);
     }
 }

@@ -19,7 +19,7 @@
         <tr>
             <td style="padding: 40px 30px;">
                 <p style="font-size: 18px; margin-top: 0;">Hola, <strong>{{ $shopping->name }}</strong>,</p>
-                <p style="line-height: 1.6; color: #666;">Te informamos que tu pago para la rifa <strong style="color: #333;">{{ $shopping->raffle->name }}</strong> ha sido validado con éxito. ¡Ya estás participando!</p>
+                <p style="line-height: 1.6; color: #666;">Te informamos que tu pago para la rifa <strong style="color: #333;">{{ $shopping->raffle->description }}</strong> ha sido validado con éxito. ¡Ya estás participando!</p>
 
                 <!-- Order Details -->
                 <div style="margin: 30px 0; padding: 25px; border: 1px solid #eee; border-radius: 8px; background-color: #fafafa;">
@@ -39,7 +39,16 @@
                         </tr>
                         <tr>
                             <td style="color: #888;">Monto pagado:</td>
-                            <td style="font-weight: 600; color: #28a745;">${{ number_format($shopping->amount, 2) }}</td>
+                            <td style="font-weight: 600; color: #28a745;">
+                                @php
+                                    $symbol = $shopping->paymentMethod->currency->symbol ?? '$';
+                                @endphp
+                                {{ $symbol }} {{ number_format($shopping->amount, 2, ',', '.') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="color: #888;">Método de Pago:</td>
+                            <td style="font-weight: 600;">{{ $shopping->paymentMethod->name ?? 'N/A' }}</td>
                         </tr>
                     </table>
                 </div>
@@ -48,11 +57,15 @@
                 <div style="text-align: center; margin: 30px 0;">
                     <h3 style="margin-bottom: 20px; color: #1a1a1a;">Tus Números Asignados</h3>
                     <div style="display: block;">
-                        @foreach($shopping->assigned_numbers as $number)
-                            <span style="display: inline-block; background-color: #1a1a1a; color: #d4af37; padding: 10px 15px; margin: 5px; border-radius: 6px; font-weight: bold; font-size: 18px; border: 1px solid #d4af37;">
-                                {{ $number }}
-                            </span>
-                        @endforeach
+                        @if($shopping->assigned_numbers)
+                            @foreach($shopping->assigned_numbers as $number)
+                                <span style="display: inline-block; background-color: #1a1a1a; color: #d4af37; padding: 10px 15px; margin: 5px; border-radius: 6px; font-weight: bold; font-size: 18px; border: 1px solid #d4af37;">
+                                    {{ $number }}
+                                </span>
+                            @endforeach
+                        @else
+                            <p style="color: #888;">Los números se te asignarán a la brevedad.</p>
+                        @endif
                     </div>
                 </div>
 
