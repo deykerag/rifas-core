@@ -51,9 +51,9 @@ export const Footer = () => {
               </ul>
 
               <div className="flex justify-left space-x-4 mt-6">
-                <img src="/img/conalot.jpg" alt="Conalot" className="w-15 h-auto" />
+                <img src="/img/conalot.png" alt="Conalot" className="w-15 h-auto" />
                 <img src="/img/super-gana.png" alt="Super Gana" className="w-15 h-auto" />
-                <img src="/img/loteria-tachira.jpg" alt="Loteria del Tachira" className="w-15 h-auto" />
+                <img src="/img/loteria-tachira.png" alt="Loteria del Tachira" className="w-15 h-auto" />
               </div>
             </div>
           </div>

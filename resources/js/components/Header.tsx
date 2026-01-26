@@ -1,11 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Ticket, LogIn, Menu, X } from "lucide-react";
+import { Ticket, LogIn, Menu, X, Sun, Moon } from "lucide-react";
 import { Link, usePage } from "@inertiajs/react"; // 1. Importar usePage
 import { useState } from "react";
 import { TermsModal } from "./TermsModal";
+import { useAppearance } from "@/hooks/use-appearance";
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { appearance, updateAppearance } = useAppearance();
+
+    const toggleAppearance = () => {
+        updateAppearance(appearance === 'dark' ? 'light' : 'dark');
+    };
 
     // 2. Extraer la información compartida
     const { company_info } = usePage().props;
@@ -48,6 +54,18 @@ export const Header = () => {
                     </nav>
 
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={toggleAppearance}
+                            className="p-2 text-foreground hover:bg-muted rounded-full transition-colors"
+                            aria-label="Cambiar tema"
+                        >
+                            {appearance === 'dark' ? (
+                                <Sun className="h-5 w-5" />
+                            ) : (
+                                <Moon className="h-5 w-5" />
+                            )}
+                        </button>
+
                         {/* <Button variant="ghost" size="sm" asChild className="hidden md:flex">
                             <Link href="/login">
                                 <LogIn className="mr-2 h-4 w-4" />
@@ -74,6 +92,19 @@ export const Header = () => {
                         <Link href="/" className="text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
                         <Link href="/verify" className="text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>Verificar Ticket</Link>
                         {/*<Link href="/history" className="text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>Rifas Anteriores</Link>*/}
+                        <button
+                            onClick={() => {
+                                toggleAppearance();
+                                setIsMenuOpen(false);
+                            }}
+                            className="flex items-center gap-2 text-lg font-medium py-2"
+                        >
+                            {appearance === 'dark' ? (
+                                <><Sun className="h-5 w-5" /> Modo Claro</>
+                            ) : (
+                                <><Moon className="h-5 w-5" /> Modo Oscuro</>
+                            )}
+                        </button>
                         {/* <Link href="/login" className="flex items-center text-lg font-medium py-2" onClick={() => setIsMenuOpen(false)}>
                             <LogIn className="mr-2 h-5 w-5" /> Admin
                         </Link> */}
